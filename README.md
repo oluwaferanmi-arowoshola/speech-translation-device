@@ -29,17 +29,17 @@ The system operates in a best-effort near real-time mode, with measured end-to-e
 
 ## Key Features
 
--Real-time speech recording with user-triggered control
--Multi-language translation support
--Event-driven processing pipeline
--GUI-based interaction (Tkinter, touchscreen optimized)
--Audio playback with replay capability
--Language validation for STT/TTS compatibility
--Error handling for:
-  -No audio input
-  -Recognition failure
-  -Translation failure
-  -TTS unavailability
+- Real-time speech recording with user-triggered control
+- Multi-language translation support
+- Event-driven processing pipeline
+- GUI-based interaction (Tkinter, touchscreen optimized)
+- Audio playback with replay capability
+- Language validation for STT/TTS compatibility
+- Error handling for:
+  - No audio input
+  - Recognition failure
+  - Translation failure
+  - TTS unavailability
 
 ---
   
@@ -49,12 +49,12 @@ The system operates in a best-effort near real-time mode, with measured end-to-e
 
 The system behaves like a controlled state machine:
 
--IDLE → waiting for user input
--RECORDING → capturing audio
--PROCESSING → STT + translation + TTS
--READY → output available
--PLAYING → audio playback
--ERROR → failure state
+- IDLE → waiting for user input
+- RECORDING → capturing audio
+- PROCESSING → STT + translation + TTS
+- READY → output available
+- PLAYING → audio playback
+- ERROR → failure state
 
 This ensures predictable transitions and avoids race conditions during concurrent operations.
 
@@ -62,12 +62,12 @@ This ensures predictable transitions and avoids race conditions during concurren
 
 ### Concurrency Model
 
--GUI runs on the main thread
--Processing tasks run on worker threads
--Threading prevents UI blocking during:
-  -speech recognition
-  -translation
-  -TTS generation
+- GUI runs on the main thread
+- Processing tasks run on worker threads
+- Threading prevents UI blocking during:
+  - speech recognition
+  - translation
+  - TTS generation
 
 ---
 
@@ -129,8 +129,8 @@ speech-translation-device/
 
 Note:
 
--Tcore.py and Tgui.py represent the original integrated implementation.
--The src/ directory reflects a modularized architecture for scalability and maintainability.
+- Tcore.py and Tgui.py represent the original integrated implementation.
+- The src/ directory reflects a modularized architecture for scalability and maintainability.
 
 ---
 
@@ -155,10 +155,10 @@ pip install -r requirements.txt
 
 This project was developed and tested on:
 
--Raspberry Pi (Linux-based OS)
--Python 3.x
--USB microphone
--Audio output device (speaker)
+- Raspberry Pi (Linux-based OS)
+- Python 3.x
+- USB microphone
+- Audio output device (speaker)
 
 ### Required system tools
 
@@ -183,9 +183,9 @@ python main.py
 3. Speak into the microphone
 4. ress Translate
 5. System processes:
-  -Speech recognition
-  -Translation
-  -Speech synthesis
+  - Speech recognition
+  - Translation
+  - Speech synthesis
 6. Translated audio is played automatically
 7. Press Replay to hear it again
 
@@ -193,20 +193,20 @@ python main.py
 
 ## Limitations
 
--Depends on cloud-based STT and translation services
--Performance varies with network latency
--Microphone selection defaults to system device (not explicitly bound)
--Not hard real-time (best-effort timing)
+- Depends on cloud-based STT and translation services
+- Performance varies with network latency
+- Microphone selection defaults to system device (not explicitly bound)
+- Not hard real-time (best-effort timing)
 
 ---
 
 ## Future Improvements
 
--Offline STT/TTS models for full edge deployment
--Explicit audio device selection
--Latency optimization (pipeline parallelism)
--Hardware integration (buttons, dedicated UI)
--Multilingual fallback routing
+- Offline STT/TTS models for full edge deployment
+- Explicit audio device selection
+- Latency optimization (pipeline parallelism)
+- Hardware integration (buttons, dedicated UI)
+- Multilingual fallback routing
 
 ---
 
@@ -222,9 +222,9 @@ Embedded Systems · Real-Time Systems · IoT
 
 This project demonstrates end-to-end embedded system design, combining:
 
--real-time audio processing
--distributed AI services
--GUI interaction
--system-level integration
+- real-time audio processing
+- distributed AI services
+- GUI interaction
+- system-level integration
 
 into a cohesive, deployable application.
