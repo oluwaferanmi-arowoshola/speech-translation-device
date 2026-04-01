@@ -213,7 +213,9 @@ python main.py
 ## Author
 
 Oluwaferanmi Arowoshola
+
 M.S. Electrical & Computer Engineering
+
 Embedded Systems · Real-Time Systems · IoT
 
 ---
