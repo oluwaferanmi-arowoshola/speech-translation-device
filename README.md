@@ -1,232 +1,328 @@
 # Wireless Embedded Speech Translation Device
 
-**(Python · Raspberry Pi · STT/Translation/TTS Pipeline · Real-Time System Design)**
+**Python · Raspberry Pi · Embedded Linux · Audio Processing · STT/Translation/TTS Pipeline · GUI · Performance Validation**
 
 ## Overview
 
-This project implements a near real-time, user-triggered speech-to-speech translation system on an embedded platform (Raspberry Pi). The system captures spoken input, converts it to text, translates it into a target language, and plays back synthesized speech.
+This project implements a best-effort near real-time, user-triggered speech-to-speech translation system on a Raspberry Pi embedded Linux platform. The system captures spoken input through a USB microphone, converts the speech to text, translates the recognized text into a target language, generates synthesized speech, and plays back the translated audio.
 
-The architecture is designed as an event-driven pipeline with clear separation between audio capture, processing, and playback stages.
+The project was designed as an event-driven embedded system pipeline with separate stages for audio capture, speech recognition, translation, text-to-speech generation, playback, and GUI control. The implementation includes state-based GUI behavior, worker-thread processing to reduce UI blocking, error handling for audio/service failures, and performance validation using latency, CPU, memory, and temperature observations.
 
----
+## Project Purpose
+
+The goal of this project was to build a functional embedded speech translation prototype that combines software services, Linux audio handling, GUI control, and system-level performance monitoring on Raspberry Pi hardware.
+
+This project demonstrates:
+
+- Embedded Linux application development on Raspberry Pi
+- Audio input/output integration using USB microphone and speaker playback
+- Speech-to-text, translation, and text-to-speech pipeline integration
+- GUI-based user interaction
+- State-machine-based control flow
+- Multithreaded processing to keep the interface responsive
+- Error handling for audio, recognition, translation, and playback failures
+- Basic performance validation for latency, CPU usage, memory usage, and device temperature
 
 ## System Architecture
 
-User Input → Audio Capture → Speech-to-Text → Translation → Text-to-Speech → Playback
+The system follows a sequential audio-processing pipeline:
 
-- Audio Capture: Microphone input (PyAudio)
-- Speech-to-Text (STT): Cloud-based recognition
-- Translation: Language translation engine
-- Text-to-Speech (TTS): Synthesized audio output
-- Playback: System-level audio playback
+```text
+User Speech
+    ↓
+Audio Capture
+    ↓
+Speech-to-Text
+    ↓
+Translation
+    ↓
+Text-to-Speech
+    ↓
+Audio Playback
+    ↓
+Replay / New Recording
+```
 
-The system operates in a best-effort near real-time mode, with measured end-to-end latency from recording to playback initiation.
+The GUI controls the pipeline and displays system state transitions during recording, processing, translation, playback, and error handling.
 
-### Architecture Diagram
-![Architecture](docs/architecture.png)
+## Architecture Diagram
 
----
+![Architecture Diagram](docs/architecture.png)
 
 ## Key Features
 
-- Real-time speech recording with user-triggered control
+- Real-time user-triggered speech recording
+- Speech-to-text conversion
 - Multi-language translation support
-- Event-driven processing pipeline
-- GUI-based interaction (Tkinter, touchscreen optimized)
-- Audio playback with replay capability
-- Language validation for STT/TTS compatibility
+- Text-to-speech audio generation
+- Automatic translated audio playback
+- Replay capability for generated translated speech
+- GUI-based interaction
+- State-based system behavior
+- Worker-thread processing to reduce GUI blocking
 - Error handling for:
-  - No audio input
-  - Recognition failure
-  - Translation failure
-  - TTS unavailability
+  - no audio input
+  - speech recognition failure
+  - translation failure
+  - text-to-speech failure
+  - audio playback issues
+- Performance observation for latency, CPU usage, memory usage, and temperature
 
----
-  
+## Embedded/System-Level Focus
+
+This project was designed and tested on Raspberry Pi hardware rather than only in a desktop environment. The implementation accounts for embedded-system concerns such as:
+
+- USB microphone input on Linux
+- Audio playback using Linux audio tools
+- GUI responsiveness on constrained hardware
+- CPU and memory usage during speech processing
+- Device temperature monitoring
+- Best-effort latency measurement from recording to playback start
+- Handling failures from audio devices, cloud services, and generated speech playback
+
+Although the system uses cloud-based STT, translation, and TTS services, the integration, interface control, audio handling, and performance observation were implemented and tested as an embedded Linux prototype.
+
 ## System Design
 
-### State Management (GUI)
+### GUI State Management
 
-The system behaves like a controlled state machine:
+The GUI behaves as a controlled state machine with the following major states:
 
-- IDLE → waiting for user input
-- RECORDING → capturing audio
-- PROCESSING → STT + translation + TTS
-- READY → output available
-- PLAYING → audio playback
-- ERROR → failure state
+```text
+IDLE        → waiting for user input
+RECORDING   → capturing audio
+PROCESSING  → speech-to-text, translation, and TTS generation
+READY       → translated audio available
+PLAYING     → translated audio playback
+ERROR       → failure state
+```
 
-This ensures predictable transitions and avoids race conditions during concurrent operations.
-
----
-
-### Concurrency Model
-
-- GUI runs on the main thread
-- Processing tasks run on worker threads
-- Threading prevents UI blocking during:
-  - speech recognition
-  - translation
-  - TTS generation
-
----
+This structure helps keep the interface predictable and reduces race conditions during concurrent operations.
 
 ## State Machine
-![FSM](docs/fsm.png)
 
----
+![State Machine](docs/state-machine.png)
+
+## Concurrency Model
+
+The project separates GUI control from processing tasks so that long-running operations do not freeze the interface.
+
+General concurrency model:
+
+- GUI runs on the main thread
+- Audio capture and processing tasks run separately
+- Worker execution is used during:
+  - speech recognition
+  - translation
+  - text-to-speech generation
+  - playback handling
+
+This improves responsiveness compared with a fully blocking implementation.
+
+## Translation Example
+
+![Translation Example](docs/translation-example.png)
+
+Example flow:
+
+1. Select the source and target languages
+2. Press **Record**
+3. Speak into the microphone
+4. Press **Translate**
+5. The system performs:
+   - speech recognition
+   - translation
+   - speech synthesis
+6. Translated audio plays automatically
+7. Press **Replay** to hear the translated output again
 
 ## Performance Model
 
-Total system latency:
+The total system latency can be represented as:
 
-T_total = T_record + T_STT + T_translation + T_TTS + T_playback
+```text
+T_total = T_record + T_STT + T_translation + T_TTS + T_playback_start
+```
 
-Measured end-to-end latency (to playback start) is logged during execution.
-
----
+The project measures end-to-end timing from recording completion to translated audio playback start.
 
 ## Experimental Results
 
 ### End-to-End Latency
-![Timing](docs/results/test-1-time.png)
+
+![Latency Measurement](docs/latency-measurement.png)
+
+Observed result:
+
+```text
+End-to-end latency to playback start: approximately 2–3 seconds
+```
+
+Latency depends on:
+
+- network conditions
+- speech length
+- cloud STT response time
+- translation service response time
+- TTS generation time
+- Raspberry Pi processing load
 
 ### CPU Utilization
-![CPU](docs/results/test-1-cpu.png)
 
-### Memory & Temperature
-![RAM_TEMP](docs/results/test-1-ram-temp.png)
+![CPU Utilization](docs/cpu-utilization.png)
 
-### Translation Example
-![Example](docs/results/translation-example.png)
+CPU usage was observed during application execution to evaluate whether the Raspberry Pi could handle GUI interaction, audio processing, and service calls without becoming unresponsive.
 
----
+### Memory and Temperature
+
+![Memory and Temperature](docs/memory-temperature.png)
+
+Memory usage and device temperature were monitored during execution to evaluate system behavior on Raspberry Pi hardware.
+
+## Performance Summary
+
+| Metric | Observed Result | Notes |
+|---|---:|---|
+| End-to-end latency | ~2–3 seconds | Measured from processing to playback start |
+| CPU usage | Observed during execution | Captured while running the application |
+| Memory usage | Observed during execution | Checked during Raspberry Pi operation |
+| Temperature | Observed during execution | Used to monitor embedded hardware behavior |
 
 ## Repository Structure
 
 ```text
-.
 speech-translation-device/
-├── main.py
-├── Tcore.py                 # Core pipeline (original implementation)
-├── Tgui.py                  # GUI (original implementation)
-├── requirements.txt
+├── assets/
+│   └── audio/              # Audio-related assets or generated audio samples
+│
+├── docs/                   # Architecture diagrams, screenshots, and performance captures
+│
+├── src/                    # Modularized project structure
+│   ├── audio/              # Audio recording logic
+│   ├── core/               # Pipeline orchestration
+│   ├── gui/                # GUI interface
+│   ├── stt/                # Speech-to-text wrapper
+│   ├── translation/        # Translation wrapper
+│   └── tts/                # Text-to-speech wrapper
+│
+├── Tcore.py                # Original core pipeline implementation
+├── Tgui.py                 # Original GUI implementation
+├── main.py                 # Application entry point
+├── requirements.txt        # Python dependencies
 ├── README.md
-└── src/
-    ├── audio/
-    │   └── recorder.py
-    ├── core/
-    │   └── pipeline.py
-    ├── gui/
-    │   └── interface.py
-    ├── stt/
-    │   └── speech_to_text.py
-    ├── translation/
-    │   └── translator.py
-    └── tts/
-        └── text_to_speech.py
+└── LICENSE
 ```
 
-Note:
+## Implementation Note
 
-- Tcore.py and Tgui.py represent the original integrated implementation.
-- The src/ directory reflects a modularized architecture for scalability and maintainability.
+`Tcore.py` and `Tgui.py` represent the original integrated implementation. The `src/` directory reflects a modular project structure for maintainability and future scaling.
 
----
+The current application entry point is:
+
+```bash
+python main.py
+```
 
 ## Installation
 
 ### 1. Clone the repository
 
-```Bash
+```bash
 git clone https://github.com/oluwaferanmi-arowoshola/speech-translation-device.git
 cd speech-translation-device
 ```
 
 ### 2. Install Python dependencies
 
-```Bash
+```bash
 pip install -r requirements.txt
 ```
 
----
+### 3. Install Linux audio playback tools
 
-## System Requirements
+On Raspberry Pi OS or Debian-based Linux systems:
 
-This project was developed and tested on:
-
-- Raspberry Pi (Linux-based OS)
-- Python 3.x
-- USB microphone
-- Audio output device (speaker)
-
-### Required system tools
-
-Install on Linux (Raspberry Pi):
-
-```Bash
+```bash
+sudo apt-get update
 sudo apt-get install mpg123 alsa-utils
 ```
 
-### How to Run
+## System Requirements
 
-```Bash
+This project was developed and tested with:
+
+- Raspberry Pi
+- Raspberry Pi OS / Linux-based OS
+- Python 3.x
+- USB microphone
+- Audio output device or speaker
+- Internet connection for cloud-based speech recognition, translation, and TTS services
+
+## How to Run
+
+Run the application with:
+
+```bash
 python main.py
 ```
 
----
-
 ## Usage Flow
 
-1. Select source and target languages
-2. Press Record
-3. Speak into the microphone
-4. ress Translate
-5. System processes:
-  - Speech recognition
-  - Translation
-  - Speech synthesis
-6. Translated audio is played automatically
-7. Press Replay to hear it again
-
----
+1. Select the source and target languages.
+2. Press **Record**.
+3. Speak into the microphone.
+4. Press **Translate**.
+5. The system processes:
+   - speech recognition
+   - translation
+   - text-to-speech generation
+6. Translated audio plays automatically.
+7. Press **Replay** to hear the translated output again.
 
 ## Limitations
 
-- Depends on cloud-based STT and translation services
-- Performance varies with network latency
-- Microphone selection defaults to system device (not explicitly bound)
-- Not hard real-time (best-effort timing)
+- Uses cloud-based STT, translation, and TTS services, so performance depends on network conditions.
+- Best-effort near real-time behavior only; the system is not hard real-time.
+- Microphone input currently depends on the default Linux audio device configuration.
+- Audio-device errors may occur if ALSA/PyAudio is not configured correctly.
+- The prototype has not yet been packaged as a startup service or kiosk-style embedded application.
+- Offline STT/TTS models are not currently implemented.
+- Hardware button control was considered as a future improvement but is not currently integrated.
 
----
+## Future Engineering Improvements
 
-## Future Improvements
+- Add explicit microphone and speaker device selection
+- Add offline STT/TTS support to reduce cloud dependency
+- Package the application as a `systemd` service for Raspberry Pi deployment
+- Add hardware buttons for record, stop, translate, and replay control
+- Add structured CSV logging for latency, CPU usage, memory usage, and temperature
+- Improve pipeline parallelism to reduce end-to-end latency
+- Add touchscreen/kiosk mode for embedded deployment
+- Add configuration file support for language pairs and audio-device selection
+- Add better exception logging and recovery for failed service calls
 
-- Offline STT/TTS models for full edge deployment
-- Explicit audio device selection
-- Latency optimization (pipeline parallelism)
-- Hardware integration (buttons, dedicated UI)
-- Multilingual fallback routing
+## Key Takeaways
 
----
+This project demonstrates end-to-end embedded system design using Raspberry Pi and Python, combining:
+
+- real-time audio processing
+- distributed AI service integration
+- GUI interaction
+- state-machine control
+- multithreaded execution
+- Linux audio playback
+- performance measurement
+- error handling
+- system-level integration
+
+The project is not intended to be a hard real-time system. Instead, it demonstrates a practical embedded Linux prototype that integrates multiple software and hardware-facing components into a functional speech translation device.
 
 ## Author
 
-Oluwaferanmi Arowoshola
+**Oluwaferanmi Arowoshola**  
+M.S. Electrical & Computer Engineering  
+Embedded Systems · Real-Time Systems · IoT · FPGA · Hardware/Software Integration
 
-M.S. Electrical & Computer Engineering
+## License
 
-Embedded Systems · Real-Time Systems · IoT
-
----
-
-## Key Takeaway
-
-This project demonstrates end-to-end embedded system design, combining:
-
-- real-time audio processing
-- distributed AI services
-- GUI interaction
-- system-level integration
-
-into a cohesive, deployable application.
+This project is licensed under the MIT License.
