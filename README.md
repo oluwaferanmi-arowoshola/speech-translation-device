@@ -101,7 +101,7 @@ This structure helps keep the interface predictable and reduces race conditions 
 
 ## State Machine
 
-![State Machine](docs/state-machine.png)
+![State Machine](docs/fsm.png)
 
 ## Concurrency Model
 
@@ -121,7 +121,7 @@ This improves responsiveness compared with a fully blocking implementation.
 
 ## Translation Example
 
-![Translation Example](docs/translation-example.png)
+![Translation Example](docs/results/translation-example.png)
 
 Example flow:
 
@@ -150,7 +150,7 @@ The project measures end-to-end timing from recording completion to translated a
 
 ### End-to-End Latency
 
-![Latency Measurement](docs/latency-measurement.png)
+![Latency Measurement](docs/results/test-1-time.png)
 
 Observed result:
 
@@ -169,13 +169,13 @@ Latency depends on:
 
 ### CPU Utilization
 
-![CPU Utilization](docs/cpu-utilization.png)
+![CPU Utilization](docs/results/test-1-cpu.png)
 
 CPU usage was observed during application execution to evaluate whether the Raspberry Pi could handle GUI interaction, audio processing, and service calls without becoming unresponsive.
 
 ### Memory and Temperature
 
-![Memory and Temperature](docs/memory-temperature.png)
+![Memory and Temperature](docs/results/test-1-ram-temp.png)
 
 Memory usage and device temperature were monitored during execution to evaluate system behavior on Raspberry Pi hardware.
 
